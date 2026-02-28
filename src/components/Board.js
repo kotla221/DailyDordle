@@ -3,7 +3,10 @@ import { View, Text, StyleSheet, useWindowDimensions } from "react-native";
 import Tile from "./Tile";
 import { MAX_GUESSES, WORD_LENGTH } from "../utils/gameLogic";
 
-export default function Board({ guesses, evaluations, currentGuess, currentRow, won, label }) {
+export default function Board({
+  guesses, evaluations, currentGuess, currentRow, won, label,
+  lastSubmittedRow, theme,
+}) {
   const { width } = useWindowDimensions();
   const boardWidth = (Math.min(width, 700) - 9 - 32) / 2;
   const tileSize = Math.floor(boardWidth / WORD_LENGTH) - 4;
@@ -13,6 +16,7 @@ export default function Board({ guesses, evaluations, currentGuess, currentRow, 
     const tiles = [];
     const isCurrentRow = row === currentRow;
     const isSubmitted = row < guesses.length;
+    const isAnimatingRow = row === lastSubmittedRow;
 
     for (let col = 0; col < WORD_LENGTH; col++) {
       let letter = "";
@@ -24,7 +28,16 @@ export default function Board({ guesses, evaluations, currentGuess, currentRow, 
         letter = currentGuess[col] ?? "";
         status = letter ? "active" : "empty";
       }
-      tiles.push(<Tile key={`${row}-${col}`} letter={letter} status={status} size={tileSize} />);
+      tiles.push(
+        <Tile
+          key={`${row}-${col}`}
+          letter={letter}
+          status={status}
+          size={tileSize}
+          revealDelay={isAnimatingRow ? col * 160 : 0}
+          theme={theme}
+        />
+      );
     }
     rows.push(<View key={row} style={styles.row}>{tiles}</View>);
   }
@@ -32,9 +45,9 @@ export default function Board({ guesses, evaluations, currentGuess, currentRow, 
   return (
     <View style={styles.board}>
       <View style={styles.labelRow}>
-        <Text style={styles.label}>{label}</Text>
+        <Text style={[styles.label, { color: theme?.textMuted ?? "#818384" }]}>{label}</Text>
         {won && (
-          <View style={styles.solvedBadge}>
+          <View style={[styles.solvedBadge, { backgroundColor: theme?.correct ?? "#538d4e" }]}>
             <Text style={styles.solvedText}>✓ Solved</Text>
           </View>
         )}
@@ -45,13 +58,8 @@ export default function Board({ guesses, evaluations, currentGuess, currentRow, 
 }
 
 const styles = StyleSheet.create({
-  board: {
-    flex: 1,
-    alignItems: "center",
-  },
-  row: {
-    flexDirection: "row",
-  },
+  board: { flex: 1, alignItems: "center" },
+  row: { flexDirection: "row" },
   labelRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -62,19 +70,13 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 11,
     fontWeight: "700",
-    color: "#818384",
     letterSpacing: 2,
     textTransform: "uppercase",
   },
   solvedBadge: {
-    backgroundColor: "#538d4e",
     paddingHorizontal: 7,
     paddingVertical: 2,
     borderRadius: 20,
   },
-  solvedText: {
-    color: "#fff",
-    fontSize: 10,
-    fontWeight: "700",
-  },
+  solvedText: { color: "#fff", fontSize: 10, fontWeight: "700" },
 });

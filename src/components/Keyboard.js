@@ -7,14 +7,18 @@ const ROWS = [
   ["ENTER", "Z", "X", "C", "V", "B", "N", "M", "⌫"],
 ];
 
-const KEY_BG = {
-  correct: "#538d4e",
-  present: "#b59f3b",
-  absent:  "#3a3a3c",
-  default: "#818384",
-};
+export default function Keyboard({ onKey, keyStatus, theme }) {
+  const keyBg = (status) => {
+    if (status === "correct") return theme?.correct ?? "#538d4e";
+    if (status === "present") return theme?.present ?? "#b59f3b";
+    if (status === "absent")  return theme?.absent  ?? "#3a3a3c";
+    return theme?.keyDefault ?? "#818384";
+  };
+  const keyTextColor = (status) => {
+    if (status === "default" || !status) return theme?.keyText ?? "#fff";
+    return "#fff";
+  };
 
-export default function Keyboard({ onKey, keyStatus }) {
   return (
     <View style={styles.keyboard}>
       {ROWS.map((row, ri) => (
@@ -29,11 +33,15 @@ export default function Keyboard({ onKey, keyStatus }) {
                 style={[
                   styles.key,
                   isWide && styles.wideKey,
-                  { backgroundColor: KEY_BG[status] },
+                  { backgroundColor: keyBg(status) },
                 ]}
                 activeOpacity={0.7}
               >
-                <Text style={[styles.keyText, isWide && styles.wideKeyText]}>
+                <Text style={[
+                  styles.keyText,
+                  isWide && styles.wideKeyText,
+                  { color: keyTextColor(status) },
+                ]}>
                   {key}
                 </Text>
               </TouchableOpacity>
@@ -51,31 +59,15 @@ const styles = StyleSheet.create({
     maxWidth: 500,
     alignSelf: "center",
     paddingHorizontal: 8,
-    paddingBottom: Platform.OS === "web" ? 16 : 8,
+    paddingBottom: Platform.OS === "web" ? 20 : 8,
     paddingTop: 4,
   },
-  row: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginBottom: 6,
-  },
+  row: { flexDirection: "row", justifyContent: "center", marginBottom: 6 },
   key: {
-    width: 33,
-    height: 52,
-    marginHorizontal: 2.5,
-    borderRadius: 6,
-    alignItems: "center",
-    justifyContent: "center",
+    width: 33, height: 52, marginHorizontal: 2.5,
+    borderRadius: 6, alignItems: "center", justifyContent: "center",
   },
-  wideKey: {
-    width: 50,
-  },
-  keyText: {
-    color: "#fff",
-    fontSize: 13,
-    fontWeight: "700",
-  },
-  wideKeyText: {
-    fontSize: 11,
-  },
+  wideKey: { width: 52 },
+  keyText: { fontSize: 13, fontWeight: "700" },
+  wideKeyText: { fontSize: 11 },
 });
